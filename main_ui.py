@@ -633,6 +633,10 @@ class Ui_MainWindow(object):
         self.menuHelp.addAction(self.action_about_qt)
 
         self.retranslateUi(MainWindow)
+        self.button_add.pressed.connect(self.line_notes.clear)
+        self.button_update.pressed.connect(self.line_notes.clear)
+        self.button_remove.pressed.connect(self.line_notes.clear)
+        self.button_remove_all.pressed.connect(self.line_notes.clear)
 
         self.tabWidget.setCurrentIndex(5)
 
