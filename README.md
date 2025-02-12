@@ -1,10 +1,8 @@
-I'm still learning Python and using these as reference guides for any employment opportunities and future projects.
+I made this little application to help me keep track of all the characters and possible weapon combinations in [Cambria Sword AC](https://exa.ac/en/games/cambria-sword-ac/?v=0f177369a3b7)
 
 I used Qt Designer to make the layout.
 
 This program uses SQLite.
-
-I use SQL a lot and this project will keep me in practice.
 
 Best Regards,<br/>
 Brian
