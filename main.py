@@ -1,15 +1,15 @@
 import sys
 from PySide6.QtWidgets import QApplication, QMainWindow, QWidget, QMessageBox, QTableWidgetItem
 from PySide6.QtCore import QSettings
-from PySide6.QtSql import QSqlQuery
+from PySide6.QtSql import QSqlDatabase, QSqlQuery
 from main_ui import Ui_MainWindow as main_ui
 from about_ui import Ui_Form as about_ui
-from create_db import create_db
 import qdarkstyle
 
 class MainWindow(QMainWindow, main_ui):  
     def __init__(self):
         super().__init__()
+        self.create_db()
         self.setupUi(self)
         self.settings = QSettings('settings.ini', QSettings.IniFormat)
         self.loadSettings()
@@ -203,6 +203,27 @@ class MainWindow(QMainWindow, main_ui):
         self.table.resizeColumnsToContents()
         self.table.resizeRowsToContents()
 
+    def create_db(self):
+        self.database = QSqlDatabase.addDatabase("QSQLITE")
+        self.database.setDatabaseName("wonder_lifeforms.db")
+        if not self.database.open():
+            QMessageBox.critical(None, "Error","Could not open your database")
+            sys.exit(1)
+
+        query = QSqlQuery()
+        query.exec("""
+                    CREATE TABLE IF NOT EXISTS lifeforms (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        life_form TEXT,
+                        main_shot TEXT,
+                        option_shot TEXT,
+                        clone_eyes TEXT,
+                        sp_weapon TEXT,
+                        rating TEXT,
+                        notes TEXT
+                    )
+                    """)
+
     def dark_mode(self, checked):
         if checked:
             self.setStyleSheet(qdarkstyle.load_stylesheet_pyside6())
@@ -241,7 +262,6 @@ class AboutWindow(QWidget, about_ui):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv) # needs to run first
-    create_db()
     MainWindow = MainWindow()
     MainWindow.show()
     sys.exit(app.exec())
