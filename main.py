@@ -6,13 +6,13 @@ from main_ui import Ui_MainWindow as main_ui
 from about_ui import Ui_Form as about_ui
 import qdarkstyle
 
-class MainWindow(QMainWindow, main_ui):  
+class MainWindow(QMainWindow, main_ui): # used to display the main user interface
     def __init__(self):
         super().__init__()
         self.create_db()
         self.setupUi(self)
-        self.settings = QSettings('settings.ini', QSettings.IniFormat)
-        self.loadSettings()
+        self.settings_manager = SettingsManager(self)  # Initialize the SettingsManager
+        self.settings_manager.load_settings()  # Load settings when the app starts
 
         # Push Buttons
         self.button_add.clicked.connect(self.add_lifeform)
@@ -22,7 +22,7 @@ class MainWindow(QMainWindow, main_ui):
         self.button_search.clicked.connect(self.search_lifeform)
         
         # Menu Bar
-        self.action_about.triggered.connect(self.show_about_window)
+        self.action_about.triggered.connect(self.show_about)
         self.action_about_qt.triggered.connect(self.show_about_qt)
         self.action_dark_mode.toggled.connect(self.dark_mode)
 
@@ -45,7 +45,7 @@ class MainWindow(QMainWindow, main_ui):
         rating = self.box_rating.currentText()
 
         notes = self.line_notes.text()
-
+       
         query = QSqlQuery()
         query.prepare("""
                     INSERT INTO lifeforms (life_form, main_shot, option_shot, clone_eyes, sp_weapon, rating, notes)
@@ -63,7 +63,10 @@ class MainWindow(QMainWindow, main_ui):
 
         self.load_table() # this will load the database back into the table with the updated information
 
+        self.line_notes.clear()  # Clear the notes input field after adding the lifeform
+       
     def update_lifeform(self):
+        notes = self.line_notes.text()
         selected_row = self.table.currentRow()
  
         if selected_row == -1:
@@ -102,7 +105,11 @@ class MainWindow(QMainWindow, main_ui):
 
         self.load_table()
 
+        self.line_notes.clear()  # Clear the notes input field
+
     def remove_lifeform(self):
+        self.line_notes.clear()  # Clear the notes input field
+        
         selected_row = self.table.currentRow()
         if selected_row == -1:
             QMessageBox.warning(self, "No Wonderful Life Form chosen", "Please choose a Wonderful Life Form to remove")
@@ -123,6 +130,8 @@ class MainWindow(QMainWindow, main_ui):
         self.load_table()
 
     def remove_all(self):
+        self.line_notes.clear()  # Clear the notes input field
+
         confirm = QMessageBox.question(self, "Are you sure?", "Are you sure you want to delete?", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
         match confirm:
             case QMessageBox.StandardButton.No:
@@ -202,7 +211,7 @@ class MainWindow(QMainWindow, main_ui):
         self.table.setItem(row, 7, QTableWidgetItem(notes))
         self.table.resizeColumnsToContents()
         self.table.resizeRowsToContents()
-
+        
     def create_db(self):
         self.database = QSqlDatabase.addDatabase("QSQLITE")
         self.database.setDatabaseName("wonder_lifeforms.db")
@@ -230,38 +239,50 @@ class MainWindow(QMainWindow, main_ui):
         else:
             self.setStyleSheet('')
 
-    def show_about_window(self):
-        self.about_window = AboutWindow()
+    def show_about(self):  # loads the About window
+        self.about_window = AboutWindow(dark_mode=self.action_dark_mode.isChecked())
         self.about_window.show()
 
     def show_about_qt(self):
         QApplication.aboutQt()
 
     def closeEvent(self, event): #settings will save when closing the app
-        self.settings.setValue('window_size', self.size())
-        self.settings.setValue('window_pos', self.pos())
-        self.settings.setValue('dark_mode', self.action_dark_mode.isChecked())
+        self.settings_manager.save_settings()  # Save settings using the manager
         event.accept()
 
-    def loadSettings(self): #settings will load when opening the app
+class SettingsManager: # used to load and save settings when opening and closing the app
+    def __init__(self, main_window):
+        self.main_window = main_window
+        self.settings = QSettings('settings.ini', QSettings.IniFormat)
+
+    def load_settings(self):
         size = self.settings.value('window_size', None)
         pos = self.settings.value('window_pos', None)
         dark = self.settings.value('dark_mode')
+        
         if size is not None:
-            self.resize(size)
+            self.main_window.resize(size)
         if pos is not None:
-            self.move(pos)
+            self.main_window.move(pos)
         if dark == 'true':
-            self.action_dark_mode.setChecked(True)
-            self.setStyleSheet(qdarkstyle.load_stylesheet_pyside6())
+            self.main_window.action_dark_mode.setChecked(True)
+            self.main_window.setStyleSheet(qdarkstyle.load_stylesheet_pyside6())
 
-class AboutWindow(QWidget, about_ui):
-    def __init__(self):
+    def save_settings(self):
+        self.settings.setValue('window_size', self.main_window.size())
+        self.settings.setValue('window_pos', self.main_window.pos())
+        self.settings.setValue('dark_mode', self.main_window.action_dark_mode.isChecked())
+
+class AboutWindow(QWidget, about_ui): # Configures the About window
+    def __init__(self, dark_mode=False):
         super().__init__()
         self.setupUi(self)
 
+        if dark_mode:
+            self.setStyleSheet(qdarkstyle.load_stylesheet_pyside6())
+
 if __name__ == "__main__":
     app = QApplication(sys.argv) # needs to run first
-    MainWindow = MainWindow()
-    MainWindow.show()
+    main_window = MainWindow()
+    main_window.show()
     sys.exit(app.exec())

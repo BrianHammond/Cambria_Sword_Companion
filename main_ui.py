@@ -534,8 +534,8 @@ class Ui_MainWindow(object):
         self.verticalLayout_3.addLayout(self.grid_database)
 
         self.table = QTableWidget(self.group_search)
-        if (self.table.columnCount() < 9):
-            self.table.setColumnCount(9)
+        if (self.table.columnCount() < 8):
+            self.table.setColumnCount(8)
         __qtablewidgetitem = QTableWidgetItem()
         self.table.setHorizontalHeaderItem(0, __qtablewidgetitem)
         __qtablewidgetitem1 = QTableWidgetItem()
@@ -552,8 +552,6 @@ class Ui_MainWindow(object):
         self.table.setHorizontalHeaderItem(6, __qtablewidgetitem6)
         __qtablewidgetitem7 = QTableWidgetItem()
         self.table.setHorizontalHeaderItem(7, __qtablewidgetitem7)
-        __qtablewidgetitem8 = QTableWidgetItem()
-        self.table.setHorizontalHeaderItem(8, __qtablewidgetitem8)
         self.table.setObjectName(u"table")
         sizePolicy4 = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Expanding)
         sizePolicy4.setHorizontalStretch(0)
@@ -609,8 +607,7 @@ class Ui_MainWindow(object):
         QWidget.setTabOrder(self.box_sp_weapon_1, self.box_main_shot)
         QWidget.setTabOrder(self.box_main_shot, self.box_option_shot)
         QWidget.setTabOrder(self.box_option_shot, self.box_rating)
-        QWidget.setTabOrder(self.box_rating, self.line_notes)
-        QWidget.setTabOrder(self.line_notes, self.button_add)
+        QWidget.setTabOrder(self.box_rating, self.button_add)
         QWidget.setTabOrder(self.button_add, self.button_update)
         QWidget.setTabOrder(self.button_update, self.button_remove)
         QWidget.setTabOrder(self.button_remove, self.button_remove_all)
@@ -633,12 +630,8 @@ class Ui_MainWindow(object):
         self.menuHelp.addAction(self.action_about_qt)
 
         self.retranslateUi(MainWindow)
-        self.button_add.pressed.connect(self.line_notes.clear)
-        self.button_update.pressed.connect(self.line_notes.clear)
-        self.button_remove.pressed.connect(self.line_notes.clear)
-        self.button_remove_all.pressed.connect(self.line_notes.clear)
 
-        self.tabWidget.setCurrentIndex(5)
+        self.tabWidget.setCurrentIndex(1)
 
 
         QMetaObject.connectSlotsByName(MainWindow)
