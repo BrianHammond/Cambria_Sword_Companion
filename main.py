@@ -26,7 +26,7 @@ class MainWindow(QMainWindow, main_ui): # used to display the main user interfac
         self.action_about_qt.triggered.connect(self.show_about_qt)
         self.action_dark_mode.toggled.connect(self.dark_mode)
 
-        self.load_table()
+        self.query_db()
 
     def add_lifeform(self):
         wonderful_group_index = self.tabWidget.currentIndex() # get the index number for each tab
@@ -61,7 +61,7 @@ class MainWindow(QMainWindow, main_ui): # used to display the main user interfac
 
         query.exec()
 
-        self.load_table() # this will load the database back into the table with the updated information
+        self.query_db() # this will load the database back into the table with the updated information
 
         self.line_notes.clear()  # Clear the notes input field after adding the lifeform
        
@@ -103,7 +103,7 @@ class MainWindow(QMainWindow, main_ui): # used to display the main user interfac
 
         query.exec()
 
-        self.load_table()
+        self.query_db()
 
         self.line_notes.clear()  # Clear the notes input field
 
@@ -127,7 +127,7 @@ class MainWindow(QMainWindow, main_ui): # used to display the main user interfac
 
         query.exec()
 
-        self.load_table()
+        self.query_db()
 
     def remove_all(self):
         self.line_notes.clear()  # Clear the notes input field
@@ -147,7 +147,7 @@ class MainWindow(QMainWindow, main_ui): # used to display the main user interfac
 
         query.exec()
 
-        self.load_table()
+        self.query_db()
 
     def search_lifeform (self):
         self.table.setRowCount(0)
@@ -177,20 +177,21 @@ class MainWindow(QMainWindow, main_ui): # used to display the main user interfac
         
         row = 0
         while query.next(): # while loop to query all the rows in the database and add them to the table
-            self.query_db(query, row)
+            self.populate_table(query, row)
             row += 1
 
-    def load_table(self):
+    def query_db(self): # queries the database and updates the table
         self.table.setRowCount(0)
 
         query = QSqlQuery("SELECT * FROM lifeforms")
 
         row = 0
         while query.next(): # while loop to query all the rows in the database and add them to the table
-            self.query_db(query, row)
+            self.populate_table(query, row)
             row += 1
 
-    def query_db(self, query, row):
+    def populate_table(self, query, row):
+        # these query the database to get each values
         id = query.value(0)
         life_form = query.value(1)
         main_shot = query.value(2)
@@ -200,19 +201,22 @@ class MainWindow(QMainWindow, main_ui): # used to display the main user interfac
         rating = query.value(6)
         notes = query.value(7)
 
+        # the queried values are then populated to the table
+        self.table.setColumnCount(8)
+        self.table.setHorizontalHeaderLabels(['ID','Life Form','Main Shot','Option Shot','Clone Eyes','Special Weapon','Rating','Notes'])
         self.table.insertRow(row)
-        self.table.setItem(row, 0, QTableWidgetItem(str(id)))
-        self.table.setItem(row, 1, QTableWidgetItem(life_form))
-        self.table.setItem(row, 2, QTableWidgetItem(main_shot))
-        self.table.setItem(row, 3, QTableWidgetItem(option_shot))
-        self.table.setItem(row, 4, QTableWidgetItem(clone_eyes))
-        self.table.setItem(row, 5, QTableWidgetItem(sp_weapon))
-        self.table.setItem(row, 6, QTableWidgetItem(rating))
-        self.table.setItem(row, 7, QTableWidgetItem(notes))
+        self.table.setItem(row, 0, QTableWidgetItem('  '+str(id)+'  '))
+        self.table.setItem(row, 1, QTableWidgetItem('  '+life_form+'  '))
+        self.table.setItem(row, 2, QTableWidgetItem('  '+main_shot+'  '))
+        self.table.setItem(row, 3, QTableWidgetItem('  '+option_shot+'  '))
+        self.table.setItem(row, 4, QTableWidgetItem('  '+clone_eyes+'  '))
+        self.table.setItem(row, 5, QTableWidgetItem('  '+sp_weapon+'  '))
+        self.table.setItem(row, 6, QTableWidgetItem('  '+rating+'  '))
+        self.table.setItem(row, 7, QTableWidgetItem('  '+notes+'  '))
         self.table.resizeColumnsToContents()
         self.table.resizeRowsToContents()
         
-    def create_db(self):
+    def create_db(self): # creates a database if none is found
         self.database = QSqlDatabase.addDatabase("QSQLITE")
         self.database.setDatabaseName("wonder_lifeforms.db")
         if not self.database.open():
@@ -239,7 +243,7 @@ class MainWindow(QMainWindow, main_ui): # used to display the main user interfac
         else:
             self.setStyleSheet('')
 
-    def show_about(self):  # loads the About window
+    def show_about(self): # loads the About window
         self.about_window = AboutWindow(dark_mode=self.action_dark_mode.isChecked())
         self.about_window.show()
 
